@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#d9482f">
+<title>今天吃什么 · 摇一摇决定</title>
+<meta name="description" content="两个板块：调理食谱（补血、暖胃、健脾）和日常餐食。摇一摇老虎机，决定今天吃什么。">
+<meta property="og:title" content="今天吃什么 · 摇一摇决定">
+<meta property="og:description" content="补血、暖胃、健脾调理食谱，加上饺子、炒粉、番茄炒蛋等日常餐食。摇一摇，别再纠结。">
+<meta property="og:type" content="website">
+<style>
+  :root{
+    --bg:#fff7ec;
+    --bg2:#ffefd9;
+    --ink:#2b2118;
+    --muted:#8a7663;
+    --brand:#d9482f;
+    --brand-deep:#a92f1c;
+    --gold:#e8a33d;
+    --card:#fffdf9;
+    --line:#f0dfcc;
+    --green:#4d7a4a;
+    --shadow:0 10px 30px rgba(120,70,30,.10);
+    --radius:18px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 500px at 15% -10%, #ffe3c2 0%, transparent 60%),
+      radial-gradient(900px 420px at 110% 0%, #ffd9c9 0%, transparent 55%),
+      var(--bg);
+    min-height:100vh;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:28px 18px 56px}
+
+  header.hero{text-align:center;padding:14px 6px 22px}
+  .hero .kicker{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:12px;letter-spacing:.18em;color:var(--brand-deep);
+    background:#ffe9d8;border:1px solid #ffd3b8;border-radius:999px;
+    padding:6px 12px;margin-bottom:14px;
+  }
+  .hero h1{
+    margin:0;font-size:clamp(30px,8vw,44px);line-height:1.15;
+    letter-spacing:-.02em;font-weight:800;
+  }
+  .hero h1 em{font-style:normal;color:var(--brand)}
+  .hero p{margin:12px auto 0;max-width:30em;color:var(--muted);font-size:14px;line-height:1.7}
+
+  .tabs{
+    display:grid;grid-template-columns:1fr 1fr;gap:8px;
+    background:#fff1df;border:1px solid #f5ddc4;border-radius:16px;
+    padding:6px;margin:6px 0 18px;position:sticky;top:10px;z-index:20;
+    backdrop-filter:blur(10px);
+  }
+  .tab{
+    appearance:none;border:0;background:transparent;border-radius:12px;
+    padding:12px 10px;font-size:15px;font-weight:700;color:#8a6d55;
+    cursor:pointer;transition:all .22s ease;font-family:inherit;
+    display:flex;align-items:center;justify-content:center;gap:7px;
+  }
+  .tab .dot{width:7px;height:7px;border-radius:50%;background:#d8bda3;transition:background .2s}
+  .tab.active{background:var(--brand);color:#fff;box-shadow:0 6px 16px rgba(217,72,47,.28)}
+  .tab.active .dot{background:#ffd9c9}
+  .tab:not(.active):hover{background:#ffe8d3}
+
+  .section-note{
+    display:block;
+    color:var(--muted);font-size:12.5px;line-height:1.6;
+    margin:-6px 2px 16px;
+  }
+  .section-note b{color:var(--brand-deep)}
+
+  /* ---------- 老虎机 ---------- */
+  .machine{
+    position:relative;border-radius:24px;padding:18px 16px 16px;
+    background:
+      radial-gradient(120% 90% at 50% -20%, #5a3522 0%, #2b1a11 58%, #1e120c 100%);
+    box-shadow:0 22px 50px rgba(80,40,15,.28), inset 0 0 0 1px rgba(255,205,140,.18);
+    overflow:hidden;
+  }
+  .machine::before{
+    content:"";position:absolute;inset:8px;border-radius:18px;
+    border:1px dashed rgba(255,205,140,.22);pointer-events:none;
+  }
+  .machine-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 6px 12px;position:relative;z-index:1;
+  }
+  .machine-head .label{
+    color:#ffd9a8;font-size:12px;letter-spacing:.16em;font-weight:700;
+  }
+  .machine-head .badge{
+    font-size:11px;color:#ffd9a8;border:1px solid rgba(255,217,168,.35);
+    border-radius:999px;padding:4px 9px;background:rgba(255,217,168,.08);
+  }
+  .reels{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+    position:relative;z-index:1;
+  }
+  .reel{
+    background:linear-gradient(180deg,#fffaf0,#ffe9cc);
+    border-radius:14px;min-height:104px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:6px;padding:10px 6px;text-align:center;
+    box-shadow:inset 0 1px 0 #fff, 0 6px 14px rgba(0,0,0,.22);
+    border:2px solid #f1d3a8;
+    overflow:hidden;position:relative;
+  }
+  .reel::after{
+    content:"";position:absolute;left:0;right:0;top:0;height:38%;
+    background:linear-gradient(180deg,rgba(255,255,255,.65),transparent);pointer-events:none;
+  }
+  .reel .emoji{font-size:26px;line-height:1;filter:drop-shadow(0 2px 2px rgba(0,0,0,.12))}
+  .reel .name{
+    font-size:12.5px;font-weight:800;line-height:1.3;color:#5a3418;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+    word-break:break-all;
+  }
+  .reel.spinning .emoji{animation:jitter .18s infinite}
+  .reel.spinning .name{filter:blur(.6px);opacity:.75}
+  @keyframes jitter{
+    0%{transform:translateY(-2px) rotate(-3deg)}
+    50%{transform:translateY(2px) rotate(3deg)}
+    100%{transform:translateY(-2px) rotate(-3deg)}
+  }
+  .spin-row{display:flex;gap:10px;margin-top:14px;position:relative;z-index:1}
+  .spin-btn{
+    flex:1;appearance:none;border:0;border-radius:14px;padding:15px 16px;
+    font-size:16px;font-weight:800;color:#3a1c0c;cursor:pointer;
+    background:linear-gradient(180deg,#ffd27a,#f0a33d);
+    box-shadow:0 8px 0 #a8641c, 0 14px 24px rgba(0,0,0,.28);
+    transition:transform .08s ease, box-shadow .08s ease;
+    font-family:inherit;letter-spacing:.02em;
+  }
+  .spin-btn:active{transform:translateY(4px);box-shadow:0 4px 0 #a8641c, 0 8px 16px rgba(0,0,0,.24)}
+  .spin-btn:disabled{opacity:.7;cursor:wait}
+  .spin-btn .sub{display:block;font-size:11px;font-weight:600;opacity:.75;margin-top:3px}
+
+  /* ---------- 结果 ---------- */
+  .result{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);
+    border-radius:22px;box-shadow:var(--shadow);padding:20px 18px;
+    display:none;position:relative;overflow:hidden;
+  }
+  .result.show{display:block;animation:pop .42s cubic-bezier(.2,.9,.3,1.3)}
+  @keyframes pop{0%{opacity:0;transform:translateY(14px) scale(.97)}100%{opacity:1;transform:none}}
+  .result::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+    background:linear-gradient(180deg,var(--brand),var(--gold));
+  }
+  .result .top{display:flex;align-items:center;gap:12px}
+  .result .big-emoji{
+    width:52px;height:52px;border-radius:16px;background:#fff0df;
+    display:flex;align-items:center;justify-content:center;font-size:28px;flex:0 0 auto;
+  }
+  .result h2{margin:0;font-size:22px;line-height:1.25}
+  .result .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .tag{
+    font-size:11px;color:var(--brand-deep);background:#ffe9d8;
+    border:1px solid #ffd3b8;border-radius:999px;padding:3px 8px;font-weight:700;
+  }
+  .tag.green{color:#3f6a3c;background:#eaf4e6;border-color:#cfe4c8}
+  .result .why{margin:14px 0 0;color:#5c4a3a;font-size:14px;line-height:1.75}
+  .block-title{
+    font-size:12px;font-weight:800;letter-spacing:.12em;color:var(--muted);
+    margin:18px 0 8px;text-transform:uppercase;
+  }
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{
+    font-size:13px;background:#fbf1e4;border:1px solid #f0dcc5;
+    color:#5f4936;border-radius:10px;padding:7px 10px;
+  }
+  .steps{margin:0;padding-left:20px;color:#5c4a3a;font-size:14px;line-height:1.9}
+  .steps li::marker{color:var(--brand);font-weight:800}
+  .note{
+    margin-top:14px;font-size:12px;line-height:1.7;color:#8a6a4a;
+    background:#fff6e9;border:1px dashed #f0d3b2;border-radius:12px;padding:10px 12px;
+  }
+
+  /* ---------- 列表 ---------- */
+  .list-head{display:flex;align-items:baseline;justify-content:space-between;margin:28px 2px 12px}
+  .list-head h3{margin:0;font-size:17px}
+  .list-head span{color:var(--muted);font-size:12px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .dish{
+    text-align:left;appearance:none;border:1px solid var(--line);background:var(--card);
+    border-radius:16px;padding:13px 12px;cursor:pointer;font-family:inherit;
+    box-shadow:0 4px 12px rgba(120,70,30,.05);transition:transform .15s ease, box-shadow .15s ease;
+    display:flex;gap:10px;align-items:flex-start;color:var(--ink);
+  }
+  .dish:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(120,70,30,.10)}
+  .dish .de{font-size:22px;line-height:1.2;flex:0 0 auto}
+  .dish .dn{display:block;font-size:14px;font-weight:800;line-height:1.35}
+  .dish .dt{display:block;margin-top:3px;font-size:11px;color:var(--muted);line-height:1.4}
+  .dish .mini-tag{
+    display:inline-block;margin-top:6px;font-size:10px;color:var(--brand-deep);
+    background:#fff0e0;border-radius:6px;padding:2px 6px;
+  }
+
+  footer{margin-top:36px;text-align:center;color:#a08b74;font-size:11.5px;line-height:1.8}
+  footer .heart{color:var(--brand)}
+
+  @media (max-width:360px){
+    .grid{grid-template-columns:1fr}
+    .reel{min-height:92px}
+    .reel .name{font-size:11.5px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="kicker">DAILY FOOD PICKER</div>
+    <h1>今天吃<em>什么</em></h1>
+    <p>调理身体有调理的吃法，嘴馋有嘴馋的吃法。<br>选个板块，摇一摇，把选择交给老虎机。</p>
+  </header>
+
+  <nav class="tabs" aria-label="板块切换">
+    <button class="tab active" id="tabDaily" data-tab="daily" aria-selected="true">
+      <span class="dot"></span>日常餐食
+    </button>
+    <button class="tab" id="tabCare" data-tab="care" aria-selected="false">
+      <span class="dot"></span>调理食谱
+    </button>
+  </nav>
+
+  <p class="section-note" id="sectionNote"></p>
+
+  <section class="machine" aria-label="今天吃什么老虎机">
+    <div class="machine-head">
+      <span class="label">TODAY'S SLOT</span>
+      <span class="badge" id="machineBadge">日常池</span>
+    </div>
+    <div class="reels">
+      <div class="reel" id="reel0"><span class="emoji">🍚</span><span class="name">准备中</span></div>
+      <div class="reel" id="reel1"><span class="emoji">🥢</span><span class="name">准备中</span></div>
+      <div class="reel" id="reel2"><span class="emoji">🥣</span><span class="name">准备中</span></div>
+    </div>
+    <div class="spin-row">
+      <button class="spin-btn" id="spinBtn">
+        摇一摇，决定今天吃什么
+        <span class="sub">停在哪格就吃哪个</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="result" id="result" aria-live="polite">
+    <div class="top">
+      <div class="big-emoji" id="resultEmoji">🍜</div>
+      <div>
+        <h2 id="resultName">—</h2>
+        <div class="tags" id="resultTags"></div>
+      </div>
+    </div>
+    <p class="why" id="resultWhy"></p>
+    <div class="block-title">主要食材</div>
+    <div class="chips" id="resultIngredients"></div>
+    <div class="block-title">怎么做 / 怎么吃</div>
+    <ol class="steps" id="resultSteps"></ol>
+    <div class="note" id="resultNote"></div>
+  </section>
+
+  <div class="list-head">
+    <h3 id="listTitle">这个板块还有什么</h3>
+    <span id="listCount"></span>
+  </div>
+  <div class="grid" id="grid"></div>
+
+  <footer>
+    愿每一顿都吃得舒服。<span class="heart">♥</span><br>
+    调理食谱仅作日常饮食参考，不能替代医生诊断；有基础疾病或正在服药请先咨询医生。
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var CARE = [
+    {
+      name: "红枣桂圆小米粥", emoji: "🥣", tags: ["补血", "暖胃", "易消化"],
+      why: "红枣和桂圆偏温，小米养胃。适合气血不足、手脚发凉、早上没胃口的时候。",
+      ingredients: ["小米", "红枣", "桂圆干", "枸杞", "红糖少许"],
+      steps: ["小米洗净，清水浸泡 20 分钟。", "红枣去核，和桂圆一起下锅。", "小火煮 25 分钟至米开花，关火前放枸杞。", "喜欢甜口加一小块红糖，不要放多。"],
+      note: "桂圆偏温，容易上火、口干舌燥时少放；血糖高的人不加糖。"
+    },
+    {
+      name: "菠菜猪肝汤", emoji: "🥬", tags: ["补铁", "补血", "快手"],
+      why: "猪肝含血红素铁，菠菜和姜片去腥提味。适合脸色偏白、容易头晕的人，每周吃 1～2 次即可。",
+      ingredients: ["猪肝", "菠菜", "姜片", "枸杞", "料酒", "盐"],
+      steps: ["猪肝切薄片，清水泡 20 分钟去血水，加料酒和姜片腌一下。", "水开下姜片和猪肝，煮到变色。", "放菠菜烫软，加盐和枸杞，立刻关火。"],
+      note: "猪肝胆固醇和维生素 A 都高，不要天天吃；痛风急性期、血脂高的人少吃。"
+    },
+    {
+      name: "当归生姜羊肉汤", emoji: "🍲", tags: ["暖胃", "驱寒", "温补"],
+      why: "羊肉温阳，生姜散寒，当归在中医里常用来养血。适合怕冷、胃部发凉、冬天手脚冰的人。",
+      ingredients: ["羊肉", "当归片", "生姜", "红枣", "料酒", "盐"],
+      steps: ["羊肉冷水下锅焯水，撇去浮沫。", "羊肉、姜片、当归、红枣一起入砂锅。", "加足热水，小火炖 1.5 小时。", "出锅前加盐，撇掉表面浮油。"],
+      note: "体质偏热、正在上火、感冒发热时不要喝；孕期吃当归前先问医生。"
+    },
+    {
+      name: "山药南瓜粥", emoji: "🎃", tags: ["健脾", "养胃", "清淡"],
+      why: "山药和南瓜都绵软好消化，适合胃弱、容易胀气、吃冷食不舒服的人当早餐或晚餐。",
+      ingredients: ["铁棍山药", "南瓜", "大米", "小米"],
+      steps: ["大米小米洗净，南瓜去皮切块。", "山药戴手套去皮切段，避免手痒。", "全部下锅，加水煮 30 分钟。", "用勺子压碎南瓜，让粥更绵。"],
+      note: "山药黏液可能刺激皮肤，处理时戴手套；血糖高的人控制南瓜量。"
+    },
+    {
+      name: "黑芝麻核桃糊", emoji: "🥜", tags: ["补血", "润燥", "养发"],
+      why: "黑芝麻、核桃含铁和优质脂肪，打成糊好吸收。适合早餐赶时间、头发干枯、容易便秘的人。",
+      ingredients: ["黑芝麻", "核桃仁", "糯米粉", "牛奶或水", "冰糖少许"],
+      steps: ["黑芝麻小火炒香，核桃烤香。", "和糯米粉一起打成细粉。", "取两勺粉，用热牛奶冲开，边冲边搅。", "小火煮 2 分钟至浓稠。"],
+      note: "热量不低，一次一小碗；腹泻时少吃。"
+    },
+    {
+      name: "姜枣茶", emoji: "🫖", tags: ["暖胃", "驱寒", "简单"],
+      why: "生姜暖胃，红枣补气。适合早上胃里发凉、吹了冷风、女生经期怕冷的时候。",
+      ingredients: ["生姜", "红枣", "红糖"],
+      steps: ["生姜切 3～4 片，红枣去核。", "加水煮 10 分钟。", "关火加红糖，趁温热喝。"],
+      note: "早上喝比晚上合适；胃溃疡、容易反酸的人别空腹喝浓姜茶。"
+    },
+    {
+      name: "番茄牛腩", emoji: "🍅", tags: ["补铁", "开胃", "高蛋白"],
+      why: "牛腩补铁补蛋白，番茄的酸味开胃。适合没胃口、产后或术后需要补身体的人。",
+      ingredients: ["牛腩", "番茄", "洋葱", "姜", "番茄膏", "盐"],
+      steps: ["牛腩切块焯水，洗净浮沫。", "炒香洋葱和番茄，加一勺番茄膏。", "下牛腩和热水，小火炖 1.5 小时。", "加盐收汁，留一点汤拌饭。"],
+      note: "痛风人群控制量；炖的时候少放油。"
+    },
+    {
+      name: "红豆花生汤", emoji: "🫘", tags: ["补血", "养颜", "甜汤"],
+      why: "红豆、花生、红枣是常见的补血甜汤组合，适合当下午加餐，比奶茶踏实。",
+      ingredients: ["红豆", "花生", "红枣", "红糖"],
+      steps: ["红豆和花生提前泡 4 小时。", "加水煮 40 分钟至软烂。", "放红枣再煮 10 分钟。", "关火加少量红糖。"],
+      note: "花生过敏者不要吃；控糖的人少放糖。"
+    },
+    {
+      name: "小米南瓜蒸蛋", emoji: "🍳", tags: ["养胃", "高蛋白", "清淡"],
+      why: "蒸蛋嫩、南瓜甜，胃不舒服、吃不下硬东西的时候很合适。",
+      ingredients: ["鸡蛋", "南瓜泥", "温水", "盐", "香油"],
+      steps: ["鸡蛋打散，加 1.5 倍温水。", "拌入南瓜泥，过筛去泡。", "盖保鲜膜扎孔，水开蒸 10 分钟。", "出锅淋几滴香油。"],
+      note: "鸡蛋过敏者不吃；蒸的时候火不要太大，避免起蜂窝。"
+    },
+    {
+      name: "桂圆红枣鸡蛋糖水", emoji: "🍮", tags: ["补血", "暖身", "女生"],
+      why: "桂圆、红枣、鸡蛋煮成甜汤，经期后或脸色差的时候喝一碗，暖胃又舒服。",
+      ingredients: ["桂圆干", "红枣", "鸡蛋", "枸杞", "红糖"],
+      steps: ["红枣去核，和桂圆加水煮 15 分钟。", "打入鸡蛋，煮成荷包蛋。", "加枸杞和红糖，再煮 2 分钟。"],
+      note: "容易上火、感冒发热时不要喝；血糖高的人不加糖。"
+    }
+  ];
+
+  var DAILY = [
+    {
+      name: "番茄炒蛋", emoji: "🍅", tags: ["家常", "快手", "下饭"],
+      why: "不知道吃什么的时候，番茄炒蛋永远不会错。酸甜下饭，十分钟搞定。",
+      ingredients: ["番茄", "鸡蛋", "葱花", "盐", "糖少许"],
+      steps: ["鸡蛋加一点盐打散，热油炒到刚凝固盛出。", "番茄切块下锅炒出汁。", "倒回鸡蛋，加盐和一小撮糖。", "撒葱花出锅。"],
+      note: "想汤汁多就加两勺水；拌饭一绝。"
+    },
+    {
+      name: "饺子", emoji: "🥟", tags: ["主食", "管饱", "可冷冻"],
+      why: "饺子是碳水和肉菜的合体，煮一锅不用另外做菜。适合懒、饿、想一次多包点冻起来。",
+      ingredients: ["饺子皮", "猪肉馅", "白菜或韭菜", "姜末", "生抽", "香油"],
+      steps: ["菜切碎杀水，和肉馅、姜末、生抽、香油拌上劲。", "包好后水开下锅。", "点两次凉水，饺子浮起就熟。", "蘸醋和辣椒油。"],
+      note: "冷冻饺子不用解冻，水开直接煮，多煮一分钟。"
+    },
+    {
+      name: "炒粉", emoji: "🍜", tags: ["主食", "锅气", "夜宵"],
+      why: "河粉或米粉配鸡蛋、豆芽、青菜，大火快炒有锅气，适合不知道吃啥的晚上。",
+      ingredients: ["河粉", "鸡蛋", "豆芽", "青菜", "生抽", "老抽", "蒜"],
+      steps: ["河粉提前抖散，避免粘成团。", "热锅下蛋炒散，再下蒜末和配菜。", "下河粉，大火快炒。", "生抽调味、老抽上色，出锅前淋一点油。"],
+      note: "锅一定要够热，粉才不容易断；豆芽最后放，保持脆。"
+    },
+    {
+      name: "蛋炒饭", emoji: "🍚", tags: ["快手", "剩饭救星", "管饱"],
+      why: "隔夜饭的最佳归宿。鸡蛋、葱花、一点酱油，五分钟解决一顿。",
+      ingredients: ["隔夜米饭", "鸡蛋", "葱花", "盐", "生抽"],
+      steps: ["米饭提前抓散。", "热油炒蛋，盛出。", "下米饭大火炒到粒粒分明。", "倒回鸡蛋，加盐和生抽，撒葱花。"],
+      note: "米饭太湿就多炒一会儿；加一勺猪油更香。"
+    },
+    {
+      name: "牛肉面", emoji: "🍲", tags: ["汤面", "暖胃", "管饱"],
+      why: "一碗热汤面，有肉有面有青菜。冬天或者胃里空的时候，比冷食舒服。",
+      ingredients: ["面条", "牛肉", "青菜", "葱姜", "生抽", "八角"],
+      steps: ["牛肉焯水，加葱姜八角炖 1 小时。", "另起锅煮面。", "面快熟时放青菜。", "浇牛肉汤，铺牛肉片，撒葱花。"],
+      note: "想快就用卤牛肉片和现成高汤；痛风人群少喝浓肉汤。"
+    },
+    {
+      name: "麻辣烫", emoji: "🌶️", tags: ["重口", "自选", "外卖"],
+      why: "想吃什么拿什么，蔬菜、豆制品、肉丸一锅煮。适合人多口味不一致的时候。",
+      ingredients: ["各种蔬菜", "豆制品", "肉丸", "方便面或粉丝", "麻辣底料", "芝麻酱"],
+      steps: ["先煮耐煮的根茎和丸子。", "再下叶菜和面。", "底料用汤化开，或直接蘸芝麻酱。", "怕辣就选清汤加蒜泥。"],
+      note: "丸子类加工食品多，多拿蔬菜和豆制品更均衡。"
+    },
+    {
+      name: "黄焖鸡米饭", emoji: "🍗", tags: ["下饭", "外卖", "管饱"],
+      why: "鸡腿肉、香菇、青椒炖一锅，汤汁拌饭。想不到吃什么又很饿的时候很稳。",
+      ingredients: ["鸡腿肉", "香菇", "青椒", "土豆", "生抽", "冰糖", "姜"],
+      steps: ["鸡腿切块，焯水或直接煎香。", "加姜、冰糖、生抽炒上色。", "下香菇土豆，加热水炖 20 分钟。", "放青椒收汁，配米饭。"],
+      note: "汤汁别收太干，拌饭才是灵魂。"
+    },
+    {
+      name: "煲仔饭", emoji: "🍛", tags: ["锅巴", "广式", "管饱"],
+      why: "腊味、米饭、锅巴一次满足。适合想吃得有仪式感又不想做很多菜的时候。",
+      ingredients: ["大米", "腊肠或腊肉", "青菜", "鸡蛋", "生抽", "蚝油", "香油"],
+      steps: ["米泡 30 分钟，砂锅刷油。", "米加水煮到收水，铺腊味。", "沿锅边淋油，小火焖出锅巴。", "打一个蛋，放烫好的青菜，淋酱汁。"],
+      note: "火要小，听到滋滋声再焖两分钟；别把锅烧糊。"
+    },
+    {
+      name: "烧烤", emoji: "🍢", tags: ["聚会", "重口", "夜宵"],
+      why: "适合一群人不知道吃什么的时候，边烤边聊。点的时候多配点蔬菜和主食。",
+      ingredients: ["肉串", "茄子", "韭菜", "馒头片", "蒜蓉", "孜然", "辣椒面"],
+      steps: ["先点肉和蔬菜搭配。", "茄子、韭菜、馒头片很吸味。", "怕咸就让少放酱。", "配一瓶无糖茶解腻。"],
+      note: "烤焦的部分不要吃；夜宵别吃太撑。"
+    },
+    {
+      name: "火锅", emoji: "🍲", tags: ["聚会", "自选", "冬天"],
+      why: "人多吃火锅最省事，口味各自涮。锅底选清汤或番茄，蔬菜豆制品多拿一点。",
+      ingredients: ["牛羊肉片", "豆腐", "菌菇", "绿叶菜", "粉条", "蘸料"],
+      steps: ["先下菌菇和根茎类煮汤。", "肉片涮到变色就捞。", "绿叶菜最后烫。", "蘸料少放油和盐。"],
+      note: "汤底煮太久嘌呤高，痛风人群少喝汤。"
+    },
+    {
+      name: "螺蛳粉", emoji: "🍜", tags: ["重口", "臭味", "夜宵"],
+      why: "酸笋、腐竹、花生、辣油，想吃重口的时候很过瘾。适合一个人在家吃，不祸害别人。",
+      ingredients: ["螺蛳粉", "酸笋", "腐竹", "花生", "青菜", "辣油"],
+      steps: ["米粉先煮软，换水。", "加汤料和酸笋煮开。", "放腐竹、花生、青菜。", "辣油按自己承受度加。"],
+      note: "盐分高，汤别全喝完；吃完开窗通风。"
+    },
+    {
+      name: "兰州拉面", emoji: "🍜", tags: ["汤面", "清真", "快手"],
+      why: "清汤、萝卜、牛肉、香菜，一碗下去很舒服。适合不想吃辣、想吃热汤的时候。",
+      ingredients: ["拉面", "牛肉片", "白萝卜", "香菜", "蒜苗", "辣椒油"],
+      steps: ["点毛细或二细，按自己口感。", "先喝一口清汤。", "加醋和辣椒油调味。", "配一小碟牛肉。"],
+      note: "汤咸就少喝；香菜不吃提前说。"
+    }
+  ];
+
+  var POOLS = { daily: DAILY, care: CARE };
+  var META = {
+    daily: {
+      note: "<b>日常餐食</b>：饺子、炒粉、番茄炒蛋、火锅……嘴馋和管饱都在这边。摇到哪个就吃哪个，别再刷外卖软件了。",
+      badge: "日常池",
+      listTitle: "这个板块还有什么"
+    },
+    care: {
+      note: "<b>调理食谱</b>：按补血、暖胃、健脾、易消化来分。适合想吃得舒服一点、最近气色差或胃里发凉的时候。",
+      badge: "调理池",
+      listTitle: "调理食谱还有这些"
+    }
+  };
+
+  var state = { tab: "daily", spinning: false, current: null, timers: [], intervals: [] };
+
+  var $ = function (id) { return document.getElementById(id); };
+  var reels = [$("reel0"), $("reel1"), $("reel2")];
+
+  function pick(pool) {
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  function renderReel(el, dish) {
+    el.innerHTML = '<span class="emoji">' + dish.emoji + '</span><span class="name">' + dish.name + '</span>';
+  }
+
+  function renderGrid() {
+    var pool = POOLS[state.tab];
+    var grid = $("grid");
+    grid.innerHTML = "";
+    pool.forEach(function (dish) {
+      var b = document.createElement("button");
+      b.className = "dish";
+      b.type = "button";
+      b.innerHTML =
+        '<span class="de">' + dish.emoji + '</span>' +
+        '<span><span class="dn">' + dish.name + '</span>' +
+        '<span class="dt">' + dish.tags.slice(0, 2).join(" · ") + '</span>' +
+        '<span class="mini-tag">' + dish.tags[0] + '</span></span>';
+      b.addEventListener("click", function () {
+        showResult(dish);
+        $("result").scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+      grid.appendChild(b);
+    });
+    $("listCount").textContent = pool.length + " 个选项";
+  }
+
+  function showResult(dish) {
+    state.current = dish;
+    $("resultEmoji").textContent = dish.emoji;
+    $("resultName").textContent = dish.name;
+    $("resultWhy").textContent = dish.why;
+    $("resultNote").textContent = dish.note || "";
+    $("resultNote").style.display = dish.note ? "block" : "none";
+
+    var tags = $("resultTags");
+    tags.innerHTML = "";
+    dish.tags.forEach(function (t, i) {
+      var s = document.createElement("span");
+      s.className = "tag" + (i > 0 ? " green" : "");
+      s.textContent = t;
+      tags.appendChild(s);
+    });
+
+    var ing = $("resultIngredients");
+    ing.innerHTML = "";
+    dish.ingredients.forEach(function (it) {
+      var s = document.createElement("span");
+      s.className = "chip";
+      s.textContent = it;
+      ing.appendChild(s);
+    });
+
+    var steps = $("resultSteps");
+    steps.innerHTML = "";
+    dish.steps.forEach(function (it) {
+      var li = document.createElement("li");
+      li.textContent = it;
+      steps.appendChild(li);
+    });
+
+    $("result").classList.add("show");
+  }
+
+  function clearTimers() {
+    state.timers.forEach(clearTimeout);
+    state.timers = [];
+    state.intervals.forEach(clearInterval);
+    state.intervals = [];
+  }
+
+  function settle(dish, delay, idx) {
+    state.timers.push(setTimeout(function () {
+      reels[idx].classList.remove("spinning");
+      renderReel(reels[idx], dish);
+      // 第三格落定后再出结果，制造一点悬念
+      if (idx === 2) {
+        state.spinning = false;
+        $("spinBtn").disabled = false;
+        showResult(dish);
+        $("result").scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, delay));
+  }
+
+  function spin() {
+    if (state.spinning) return;
+    state.spinning = true;
+    clearTimers();
+    $("result").classList.remove("show");
+    $("spinBtn").disabled = true;
+
+    var pool = POOLS[state.tab];
+    var chosen = pick(pool);
+
+    reels.forEach(function (el) { el.classList.add("spinning"); });
+
+    // 三个转轮各自滚动，落定时间错开
+    [0, 1, 2].forEach(function (idx) {
+      var tick = setInterval(function () {
+        renderReel(reels[idx], pick(pool));
+      }, 70 + idx * 15);
+      state.intervals.push(tick);
+      state.timers.push(setTimeout(function () {
+        clearInterval(tick);
+      }, 1100 + idx * 260));
+    });
+
+    // 最终三格统一到同一道菜（老虎机的仪式感，结果明确）
+    state.timers.push(setTimeout(function () { renderReel(reels[0], chosen); }, 1100));
+    state.timers.push(setTimeout(function () { renderReel(reels[1], chosen); }, 1360));
+    state.timers.push(setTimeout(function () { renderReel(reels[2], chosen); }, 1620));
+
+    [0, 1, 2].forEach(function (idx) {
+      state.timers.push(setTimeout(function () {
+        reels[idx].classList.remove("spinning");
+      }, 1100 + idx * 260));
+    });
+
+    state.timers.push(setTimeout(function () {
+      state.spinning = false;
+      $("spinBtn").disabled = false;
+      showResult(chosen);
+      $("result").scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 1850));
+  }
+
+  function setTab(tab) {
+    if (state.tab === tab && state.current) return;
+    state.tab = tab;
+    state.current = null;
+    clearTimers();
+    state.spinning = false;
+    $("spinBtn").disabled = false;
+    $("result").classList.remove("show");
+
+    document.querySelectorAll(".tab").forEach(function (btn) {
+      var on = btn.getAttribute("data-tab") === tab;
+      btn.classList.toggle("active", on);
+      btn.setAttribute("aria-selected", on ? "true" : "false");
+    });
+
+    $("sectionNote").innerHTML = META[tab].note;
+    $("machineBadge").textContent = META[tab].badge;
+    $("listTitle").textContent = META[tab].listTitle;
+
+    var pool = POOLS[tab];
+    reels.forEach(function (el, i) { renderReel(el, pool[i % pool.length]); });
+    renderGrid();
+  }
+
+  document.querySelectorAll(".tab").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      setTab(btn.getAttribute("data-tab"));
+    });
+  });
+
+  $("spinBtn").addEventListener("click", spin);
+
+  // 首次进入：日常板块，三格先展示不同菜，等待摇
+  setTab("daily");
+})();
+</script>
+</body>
+</html>
